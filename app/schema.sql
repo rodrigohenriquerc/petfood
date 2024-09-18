@@ -1,0 +1,42 @@
+DROP TABLE IF EXISTS user;
+
+DROP TABLE IF EXISTS pet;
+
+DROP TABLE IF EXISTS user_pet;
+
+DROP TABLE IF EXISTS meal;
+
+CREATE TABLE
+  user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+  );
+
+CREATE TABLE
+  pet (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    birthday TIMESTAMP NOT NULL,
+    weight INTEGER NOT NULL
+  );
+
+CREATE TABLE
+  user_pet (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    pet_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (pet_id) REFERENCES pet (id)
+  );
+
+CREATE TABLE
+  meal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    pet_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (pet_id) REFERENCES pet (id)
+  );
