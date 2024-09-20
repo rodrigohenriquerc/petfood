@@ -1,8 +1,32 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} 
 
-{% block title %}Login{% endblock %}
+{% block title %}Login{% endblock %} 
 
 {% block content %}
-  <h1>Hello, {{ g.user['username'] }}</h1>
-  <a href="{{ url_for('auth.logout') }}">Log Out</a>
+<h1>Hello, {{ g.user['username'] }}</h1>
+<a href="{{ url_for('auth.logout') }}">Log Out</a>
+
+<section class="container mt-5">
+  <h2 class="text-center">Meals</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Pet</th>
+        <th scope="col">When</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Owner</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for meal in meals %}
+      <tr>
+        <td>{{meal.name}}</td>
+        <td>{{meal.datetime}}</td>
+        <td>{{meal.quantity}}g</td>
+        <td>{{meal.username}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 {% endblock %}
