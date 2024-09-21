@@ -1,14 +1,24 @@
 {% extends 'base.html' %} 
 
-{% block title %}Login{% endblock %} 
+{% block title %}Home{% endblock %} 
 
 {% block content %}
 <h1>Hello, {{ g.user['username'] }}</h1>
 <a href="{{ url_for('auth.logout') }}">Log Out</a>
 
 <section class="container mt-5">
-  <h2 class="text-center">Meals</h2>
-  <table class="table">
+  <div class="d-flex justify-content-between mb-3">
+    <h2 class="text-center m-0">Meals</h2>
+    <button
+      type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#add-meal-modal"
+    >
+      Add meal
+    </button>
+  </div>
+  <table class="table table-bordered">
     <thead>
       <tr>
         <th scope="col">Pet</th>
@@ -28,5 +38,159 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <div
+    class="modal fade"
+    id="add-meal-modal"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    tabindex="-1"
+    aria-labelledby="staticBackdropLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Add meal</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            id="close-add-meal-modal-btn"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form name="add-meal" class="needs-validation" novalidate>
+            <div class="mb-4">
+              <label for="pet_id" class="form-label">Pet</label>
+              <select
+                id="pet_id"
+                name="pet_id"
+                class="form-select"
+                aria-label="Pet selection"
+              >
+                <option value="">Select pet</option>
+                {% for pet in pets %}
+                <option value="{{ pet.id }}">{{ pet.name }}</option>
+                {% endfor %}
+              </select>
+              <div id="pet-required-message" class="invalid-feedback">
+                Pet is required.
+              </div>
+            </div>
+            <div class="mb-4">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input
+                id="quantity"
+                name="quantity"
+                type="number"
+                class="form-control"
+                required
+              />
+              <div id="quantity-required-message" class="invalid-feedback">
+                Quantity is required.
+              </div>
+              <div id="quantity-invalid-message" class="invalid-feedback">
+                Quantity must be more than 0.
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button id="confirm-meal" type="button" class="btn btn-primary">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $addMealModal = document.querySelector("#add-meal-modal");
+    const $confirmMealBtn = document.querySelector("#confirm-meal");
+    const $petRequiredMessage = document.querySelector("#pet-required-message");
+    const $quantityRequiredMessage = document.querySelector(
+      "#quantity-required-message"
+    );
+    const $quantityInvalidMessage = document.querySelector(
+      "#quantity-invalid-message"
+    );
+
+    const setPetRequiredMessageDisplay = (display) => {
+      $petRequiredMessage.style.display = display;
+    };
+
+    const setQuantityRequiredMessageDisplay = (display) => {
+      $quantityRequiredMessage.style.display = display;
+    };
+
+    const setQuantityInvalidMessageDisplay = (display) => {
+      $quantityInvalidMessage.style.display = display;
+    };
+
+    const onConfirmMeal = () => {
+      let isFormValid = true;
+
+      const pet_id = document.forms["add-meal"]["pet_id"].value;
+      const quantity = document.forms["add-meal"]["quantity"].value;
+
+      if (!pet_id) {
+        setPetRequiredMessageDisplay("block");
+        isFormValid = false;
+      } else {
+        setPetRequiredMessageDisplay("none");
+      }
+
+      if (!quantity) {
+        setQuantityRequiredMessageDisplay("block");
+        isFormValid = false;
+      } else if (quantity <= 0) {
+        setQuantityInvalidMessageDisplay("block");
+        isFormValid = false;
+      } else {
+        setQuantityRequiredMessageDisplay("none");
+        setQuantityInvalidMessageDisplay("none");
+      }
+
+      if (isFormValid) {
+        fetch("/add-meal", {
+          method: "POST",
+          body: JSON.stringify({ pet_id, quantity }),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((response) => {
+            if (response.ok) {
+              window.location.reload();
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    };
+
+    $addMealModal.addEventListener("show.bs.modal", () => {
+      document.forms["add-meal"]["pet_id"].value = undefined;
+      document.forms["add-meal"]["quantity"].value = undefined;
+
+      setPetRequiredMessageDisplay("none");
+      setQuantityRequiredMessageDisplay("none");
+      setQuantityInvalidMessageDisplay("none");
+
+      $confirmMealBtn.addEventListener("click", onConfirmMeal);
+    });
+
+    $addMealModal.addEventListener("hidden.bs.modal", () => {
+      $confirmMealBtn.removeEventListener("click", onConfirmMeal);
+    });
+  </script>
 </section>
 {% endblock %}
