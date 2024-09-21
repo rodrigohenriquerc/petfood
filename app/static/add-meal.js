@@ -1,23 +1,16 @@
 const $addMealModal = document.querySelector("#add-meal-modal");
 const $confirmMealBtn = document.querySelector("#confirm-meal");
-const $petRequiredMessage = document.querySelector("#pet-required-message");
-const $quantityRequiredMessage = document.querySelector(
-  "#quantity-required-message"
-);
-const $quantityInvalidMessage = document.querySelector(
-  "#quantity-invalid-message"
-);
+const $petMessage = document.querySelector("#pet-message");
+const $quantityMessage = document.querySelector("#quantity-message");
 
-const setPetRequiredMessageDisplay = (display) => {
-  $petRequiredMessage.style.display = display;
+const togglePetMessage = (message) => {
+  $petMessage.style.display = message ? "block" : "none";
+  $petMessage.textContent = message;
 };
 
-const setQuantityRequiredMessageDisplay = (display) => {
-  $quantityRequiredMessage.style.display = display;
-};
-
-const setQuantityInvalidMessageDisplay = (display) => {
-  $quantityInvalidMessage.style.display = display;
+const toggleQuantityMessage = (message) => {
+  $quantityMessage.style.display = message ? "block" : "none";
+  $quantityMessage.textContent = message;
 };
 
 const onConfirmMeal = () => {
@@ -27,21 +20,20 @@ const onConfirmMeal = () => {
   const quantity = document.forms["add-meal"]["quantity"].value;
 
   if (!pet_id) {
-    setPetRequiredMessageDisplay("block");
+    togglePetMessage("Pet is required.");
     isFormValid = false;
   } else {
-    setPetRequiredMessageDisplay("none");
+    togglePetMessage();
   }
 
   if (!quantity) {
-    setQuantityRequiredMessageDisplay("block");
+    toggleQuantityMessage("Quantity is required.");
     isFormValid = false;
   } else if (quantity <= 0) {
-    setQuantityInvalidMessageDisplay("block");
+    toggleQuantityMessage("Quantity must be more than 0.");
     isFormValid = false;
   } else {
-    setQuantityRequiredMessageDisplay("none");
-    setQuantityInvalidMessageDisplay("none");
+    toggleQuantityMessage();
   }
 
   if (isFormValid) {
@@ -52,8 +44,13 @@ const onConfirmMeal = () => {
     })
       .then((response) => {
         if (response.ok) {
-          window.location.reload();
+          return window.location.reload();
         }
+
+        return response.json();
+      })
+      .then((data) => {
+        alert(data.message);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -65,9 +62,8 @@ $addMealModal.addEventListener("show.bs.modal", () => {
   document.forms["add-meal"]["pet_id"].value = undefined;
   document.forms["add-meal"]["quantity"].value = undefined;
 
-  setPetRequiredMessageDisplay("none");
-  setQuantityRequiredMessageDisplay("none");
-  setQuantityInvalidMessageDisplay("none");
+  togglePetMessage();
+  toggleQuantityMessage();
 
   $confirmMealBtn.addEventListener("click", onConfirmMeal);
 });

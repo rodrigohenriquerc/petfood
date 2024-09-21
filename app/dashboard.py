@@ -48,9 +48,9 @@ def add_meal():
 
     if not pet_id:
         error = "Pet is required."
-    if not quantity:
+    elif not quantity:
         error = "Quantity is required."
-    if int(quantity) <= 0:
+    elif int(quantity) <= 0:
         error = "Quantity must be more than 0."
 
     if error is not None:
