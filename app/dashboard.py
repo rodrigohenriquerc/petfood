@@ -53,6 +53,21 @@ def add_meal():
     elif int(quantity) <= 0:
         error = "Quantity must be more than 0."
 
+    db = get_db()
+
+    user_pets = db.execute(
+        "SELECT pet_id as id FROM user_pet WHERE user_id = ?",
+        (user_id,),
+    ).fetchall()
+
+    user_pets_ids = []
+
+    for user_pet in user_pets:
+        user_pets_ids.append(user_pet["id"])
+
+    if int(pet_id) not in user_pets_ids:
+        error = "Invalid pet."
+
     if error is not None:
         return (
             jsonify(
@@ -62,8 +77,6 @@ def add_meal():
             ),
             400,
         )
-
-    db = get_db()
 
     db.execute(
         "INSERT INTO meal (user_id, pet_id, quantity) VALUES (?, ?, ?)",
