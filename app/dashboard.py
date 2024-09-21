@@ -44,14 +44,12 @@ def add_meal():
     pet_id = data.get("pet_id")
     quantity = data.get("quantity")
 
-    error = None
-
     if not pet_id:
-        error = "Pet is required."
+        return default_response(400, "Pet is required.")
     elif not quantity:
-        error = "Quantity is required."
+        return default_response(400, "Quantity is required.")
     elif int(quantity) <= 0:
-        error = "Quantity must be more than 0."
+        return default_response(400, "Quantity must be more than 0.")
 
     db = get_db()
 
@@ -66,17 +64,7 @@ def add_meal():
         user_pets_ids.append(user_pet["id"])
 
     if int(pet_id) not in user_pets_ids:
-        error = "Invalid pet."
-
-    if error is not None:
-        return (
-            jsonify(
-                {
-                    "message": error,
-                }
-            ),
-            400,
-        )
+        return default_response(403, "Forbidden")
 
     db.execute(
         "INSERT INTO meal (user_id, pet_id, quantity) VALUES (?, ?, ?)",
@@ -84,11 +72,15 @@ def add_meal():
     )
     db.commit()
 
+    return default_response(200, "Meal added successfully")
+
+
+def default_response(status, message):
     return (
         jsonify(
             {
-                "message": "Meal added successfully",
+                "message": message,
             }
         ),
-        200,
+        status,
     )
