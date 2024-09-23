@@ -33,7 +33,7 @@ def index():
         (user_id,),
     ).fetchall()
 
-    return render_template("dashboard/home.html", meals=meals, pets=pets)
+    return render_template("dashboard/home.html", active="home", meals=meals, pets=pets)
 
 
 @bp.route("/add-meal", methods=["POST"])
@@ -159,6 +159,12 @@ def update_meal(id):
     db.commit()
 
     return default_response(200, "Meal updated successfully")
+
+
+@bp.route("/pets")
+@login_required
+def pets():
+    return render_template("dashboard/pets.html", active="pets")
 
 
 def default_response(status, message):

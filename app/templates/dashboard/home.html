@@ -1,7 +1,9 @@
-{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content
-%}
-<h1>Hello, {{ g.user['username'] }}</h1>
-<a href="{{ url_for('auth.logout') }}">Log Out</a>
+{% extends 'dashboard/index.html' %} 
+
+{% block title %}Home{% endblock %} 
+
+{% block main%}
+<h1 class="ms-3 mt-3">Hello, {{ g.user['username'] }}</h1>
 
 <section class="container mt-5">
   <div class="d-flex justify-content-between mb-3">
