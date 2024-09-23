@@ -24,7 +24,7 @@ def index():
     db = get_db()
 
     meals = db.execute(
-        "SELECT pet.name, meal.datetime, meal.quantity, user.username FROM meal JOIN pet ON pet.id = meal.pet_id JOIN user ON user.id = meal.user_id WHERE meal.pet_id IN (SELECT pet_id FROM user_pet WHERE user_pet.user_id = ?) ORDER BY meal.datetime DESC",
+        "SELECT meal.id, pet.name, meal.datetime, meal.quantity, user.username FROM meal JOIN pet ON pet.id = meal.pet_id JOIN user ON user.id = meal.user_id WHERE meal.pet_id IN (SELECT pet_id FROM user_pet WHERE user_pet.user_id = ?) ORDER BY meal.datetime DESC",
         (user_id,),
     ).fetchall()
 
@@ -73,6 +73,39 @@ def add_meal():
     db.commit()
 
     return default_response(200, "Meal added successfully")
+
+
+@bp.route("/remove-meal/<int:id>", methods=["POST"])
+@login_required
+def remove_meal(id):
+    user_id = g.user["id"]
+    meal_id = id
+
+    if not meal_id:
+        return default_response(400, "Meal is required.")
+
+    db = get_db()
+
+    user_meals = db.execute(
+        "SELECT id FROM meal WHERE pet_id IN (SELECT pet_id FROM user_pet WHERE user_id = ?)",
+        (user_id,),
+    )
+
+    user_meals_ids = []
+
+    for user_meal in user_meals:
+        user_meals_ids.append(user_meal["id"])
+
+    if meal_id not in user_meals_ids:
+        return default_response(403, "Forbidden.")
+
+    db.execute(
+        "DELETE FROM meal WHERE id = ?",
+        (meal_id,),
+    )
+    db.commit()
+
+    return default_response(200, "Meal successfully deleted.")
 
 
 def default_response(status, message):
