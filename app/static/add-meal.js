@@ -44,6 +44,8 @@ const onConfirmMeal = () => {
     })
       .then((response) => {
         if (response.ok) {
+          alert("The meal was added")
+          
           return window.location.reload();
         }
 
