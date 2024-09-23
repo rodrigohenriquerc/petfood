@@ -23,6 +23,8 @@ function onConfirmRemoveMeal() {
   })
     .then((response) => {
       if (response.ok) {
+        alert("The meal was removed");
+
         return window.location.reload();
       }
 
