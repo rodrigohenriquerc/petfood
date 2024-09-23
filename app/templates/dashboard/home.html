@@ -28,11 +28,22 @@
     <tbody>
       {% for meal in meals %}
       <tr>
-        <td>{{meal.name}}</td>
-        <td>{{meal.datetime}}</td>
-        <td>{{meal.quantity}}g</td>
-        <td>{{meal.username}}</td>
+        <td class="align-middle">{{meal.name}}</td>
+        <td class="align-middle">{{meal.datetime}}</td>
+        <td class="align-middle">{{meal.quantity}}g</td>
+        <td class="align-middle">{{meal.username}}</td>
         <td class="d-flex justify-content-center" id="resource-actions">
+          <button
+            type="button"
+            class="btn btn-info me-3"
+            data-bs-toggle="modal"
+            data-bs-target="#update-meal-modal"
+            data-mealid="{{ meal.id }}"
+            data-pet="{{ meal.pet_id }}"
+            data-quantity="{{ meal.quantity }}"
+          >
+            <i class="fa-solid fa-pen"></i>
+          </button>
           <button
             type="button"
             class="btn btn-danger"
@@ -66,7 +77,6 @@
             class="btn-close"
             data-bs-dismiss="modal"
             aria-label="Close"
-            id="close-add-meal-modal-btn"
           ></button>
         </div>
         <div class="modal-body">
@@ -118,6 +128,77 @@
 
   <div
     class="modal fade"
+    id="update-meal-modal"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    tabindex="-1"
+    aria-labelledby="staticBackdropLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Update meal</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form name="update-meal" class="needs-validation" novalidate>
+            <div class="mb-4">
+              <label for="pet_id" class="form-label">Pet</label>
+              <select
+                id="pet_id"
+                name="pet_id"
+                class="form-select"
+                aria-label="Pet selection"
+              >
+                <option value="">Select pet</option>
+                {% for pet in pets %}
+                <option value="{{ pet.id }}">{{ pet.name }}</option>
+                {% endfor %}
+              </select>
+              <div id="pet-message" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-4">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input
+                id="quantity"
+                name="quantity"
+                type="number"
+                class="form-control"
+                required
+              />
+              <div id="quantity-message" class="invalid-feedback"></div>
+              <div id="quantity-invalid-message" class="invalid-feedback"></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button
+            id="update-meal-confirmation-btn"
+            type="button"
+            class="btn btn-primary"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
     id="remove-meal-modal"
     tabindex="-1"
     aria-labelledby="exampleModalLabel"
@@ -155,7 +236,8 @@
     </div>
   </div>
 
-  <script src="static/add-meal.js"></script>
+  <script src="static/add-meal.js" type="module"></script>
   <script src="static/remove-meal.js"></script>
+  <script src="static/update-meal.js"></script>
 </section>
 {% endblock %}
