@@ -1,9 +1,41 @@
-{% extends 'dashboard/index.html' %} 
-
-{% block title %}Pets{% endblock %} 
-
-{% block main%}
+{% extends 'dashboard/index.html' %} {% block title %}Pets{% endblock %} {%
+block main%}
 <section class="container mt-5">
   <h1>Pets</h1>
+  <div class="d-flex flex-wrap gap-3">
+    {% for pet in pets %}
+    <div class="card" style="width: 18rem">
+      <img src="{{ pet.photo }}" class="card-img-top object-fit-cover" style="width: 18rem; height: 18rem" alt="..." />
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item fw-bold">{{ pet.name }}</li>
+        <li class="list-group-item">{{ pet.weight }} kg</li>
+        <li class="list-group-item">{{ pet.species }}</li>
+        <li class="list-group-item">{{ pet.age }}</li>
+      </ul>
+      <div class="d-flex flex-column gap-3 p-3">
+        <button
+          type="button"
+          class="btn btn-info"
+          data-bs-toggle="modal"
+          data-bs-target="#update-pet-modal"
+          data-petid="{{ pet.id }}"
+        >
+          <i class="fa-solid fa-pen"></i>
+          Update
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          data-bs-toggle="modal"
+          data-bs-target="#remove-pet-modal"
+          data-petid="{{ pet.id }}"
+        >
+          <i class="fa-solid fa-trash"></i>
+          Remove
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}

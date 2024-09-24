@@ -1,17 +1,10 @@
-from flask import (
-    Blueprint,
-    render_template,
-    g,
-    redirect,
-    url_for,
-    request,
-    flash,
-    jsonify,
-)
+from flask import Blueprint, render_template, g, request
 
 from app.auth import login_required
 
 from app.db import get_db
+
+from app.utils import format_age, default_response, binary_to_base64
 
 bp = Blueprint("dashboard", __name__)
 
@@ -164,15 +157,29 @@ def update_meal(id):
 @bp.route("/pets")
 @login_required
 def pets():
-    return render_template("dashboard/pets.html", active="pets")
+    user_id = g.user["id"]
 
+    db = get_db()
 
-def default_response(status, message):
-    return (
-        jsonify(
-            {
-                "message": message,
-            }
-        ),
-        status,
-    )
+    pets = db.execute(
+        "SELECT pet.* FROM pet JOIN user_pet ON pet.id = user_pet.pet_id WHERE user_id = ?",
+        (user_id,),
+    ).fetchall()
+
+    parsed_pets = []
+
+    for pet in pets:
+        parsed_pet = {}
+
+        for key in pet.keys():
+            if key == "species":
+                parsed_pet[key] = pet[key].capitalize()
+            if key == "photo":
+                parsed_pet[key] = binary_to_base64(pet[key])
+            else:
+                parsed_pet[key] = pet[key]
+
+        parsed_pet["age"] = format_age(pet["birthday"])
+        parsed_pets.append(parsed_pet)
+
+    return render_template("dashboard/pets.html", active="pets", pets=parsed_pets)
