@@ -18,7 +18,11 @@ CREATE TABLE
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     birthday TIMESTAMP NOT NULL,
-    weight INTEGER NOT NULL
+    weight REAL NOT NULL,
+    species TEXT NOT NULL,
+    photo BLOB,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id)
   );
 
 CREATE TABLE
@@ -26,8 +30,8 @@ CREATE TABLE
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     pet_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (pet_id) REFERENCES pet (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
+    FOREIGN KEY (pet_id) REFERENCES pet (id) ON DELETE CASCADE
   );
 
 CREATE TABLE
@@ -36,7 +40,17 @@ CREATE TABLE
     user_id INTEGER NOT NULL,
     pet_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
-    datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (pet_id) REFERENCES pet (id)
+    datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
+    FOREIGN KEY (pet_id) REFERENCES pet (id) ON DELETE CASCADE
   );
+
+CREATE TRIGGER after_pet_insert AFTER INSERT ON pet FOR EACH ROW BEGIN
+INSERT INTO
+  user_pet (pet_id, user_id)
+VALUES
+  (NEW.id, NEW.user_id);
+
+END;
+
+PRAGMA foreign_keys = ON;
