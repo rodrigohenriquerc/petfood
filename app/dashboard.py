@@ -22,7 +22,7 @@ def index():
     ).fetchall()
 
     pets = db.execute(
-        "SELECT pet.id, pet.name FROM pet JOIN user_pet ON pet.id = user_pet.pet_id WHERE user_id = ?",
+        "SELECT pet.id, pet.name FROM pet JOIN user_pet ON pet.id = user_pet.pet_id WHERE user_pet.user_id = ?",
         (user_id,),
     ).fetchall()
 
@@ -162,7 +162,7 @@ def pets():
     db = get_db()
 
     pets = db.execute(
-        "SELECT pet.* FROM pet JOIN user_pet ON pet.id = user_pet.pet_id WHERE user_id = ?",
+        "SELECT pet.* FROM pet JOIN user_pet ON pet.id = user_pet.pet_id WHERE user_pet.user_id = ?",
         (user_id,),
     ).fetchall()
 
@@ -175,7 +175,11 @@ def pets():
             if key == "species":
                 parsed_pet[key] = pet[key].capitalize()
             if key == "photo":
-                parsed_pet[key] = binary_to_base64(pet[key])
+                parsed_pet[key] = (
+                    binary_to_base64(pet[key])
+                    if pet[key]
+                    else "static/pet-photo-placeholder.webp"
+                )
             else:
                 parsed_pet[key] = pet[key]
 
@@ -183,3 +187,38 @@ def pets():
         parsed_pets.append(parsed_pet)
 
     return render_template("dashboard/pets.html", active="pets", pets=parsed_pets)
+
+
+@bp.route("/add-pet", methods=["POST"])
+@login_required
+def add_pet():
+    user_id = g.user["id"]
+
+    name = request.form.get("name")
+    weight = request.form.get("weight")
+    species = request.form.get("weight")
+    birthday = request.form.get("birthday")
+    photo = request.files["photo"] if request.files else None
+
+    photo_blob = photo.read() if photo else None
+
+    if not name:
+        return default_response(400, "Name is required.")
+    elif not weight:
+        return default_response(400, "Weight is required.")
+    elif int(weight) <= 0:
+        return default_response(400, "Weight must be more than 0.")
+    elif not species:
+        return default_response(400, "Species is required.")
+    elif not birthday:
+        return default_response(400, "Birthday is required.")
+
+    db = get_db()
+
+    db.execute(
+        "INSERT INTO pet (name, weight, species, birthday, photo, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (name, weight, species, f"{birthday} 00:00:00", photo_blob, user_id),
+    )
+    db.commit()
+
+    return default_response(200, "Pet added successfully")
