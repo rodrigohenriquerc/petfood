@@ -222,3 +222,36 @@ def add_pet():
     db.commit()
 
     return default_response(200, "Pet added successfully")
+
+
+@bp.route("/remove-pet/<int:id>", methods=["POST"])
+@login_required
+def remove_pet(id):
+    user_id = g.user["id"]
+    pet_id = id
+
+    if not pet_id:
+        return default_response(400, "Pet is required.")
+
+    db = get_db()
+
+    user_pets = db.execute(
+        "SELECT pet_id FROM user_pet WHERE user_id = ?",
+        (user_id,),
+    )
+
+    user_pets_ids = []
+
+    for user_pet in user_pets:
+        user_pets_ids.append(user_pet["pet_id"])
+
+    if pet_id not in user_pets_ids:
+        return default_response(403, "Forbidden.")
+
+    db.execute(
+        "DELETE FROM pet WHERE id = ?",
+        (pet_id,),
+    )
+    db.commit()
+
+    return default_response(200, "Pet successfully deleted.")
